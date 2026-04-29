@@ -1,0 +1,832 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specificationSet xmlns="http://www.yawlfoundation.org/yawlschema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.0" xsi:schemaLocation="http://www.yawlfoundation.org/yawlschema http://www.yawlfoundation.org/yawlschema/YAWL_Schema4.0.xsd">
+  <specification uri="Beschaffung_PuH">
+    <documentation>No description provided</documentation>
+    <metaData>
+      <creator>annelatour</creator>
+      <description>No description provided</description>
+      <coverage>5.2.819</coverage>
+      <version>0.1</version>
+      <persistent>false</persistent>
+      <identifier>UID_5d067d5b-f304-47bf-9edf-9a0c61847d87</identifier>
+    </metaData>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:simpleType name="AblehnungType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Das Produkt ist defekt." />
+          <xs:enumeration value="Es wurde ein falsches Produkt geliefert." />
+          <xs:enumeration value="Es wurde zu wenig geliefert." />
+          <xs:enumeration value="Die Produktqualität ist minderwertig." />
+          <xs:enumeration value="Das Produkt ist abgelaufen." />
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="ItemType">
+        <xs:sequence>
+          <xs:element name="ProduktType" type="xs:string" />
+          <xs:element name="Anzahl" type="xs:positiveInteger" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ProduktlisteType">
+        <xs:sequence>
+          <xs:element name="Produkt" type="ItemType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ReklamationType">
+        <xs:sequence>
+          <xs:element name="Produkt" type="xs:string" />
+          <xs:element name="Anzahl" type="xs:positiveInteger" />
+          <xs:element name="Ablehnungsgrund" type="AblehnungType" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ReklamationListeType">
+        <xs:sequence>
+          <xs:element name="Produkt" type="ReklamationType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="BestellungType">
+        <xs:sequence>
+          <xs:element name="Lieferant" type="xs:string" />
+          <xs:element name="Bestellung" type="ProduktlisteType" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <decomposition id="Net" isRootNet="true" xsi:type="NetFactsType">
+      <localVariable>
+        <index>0</index>
+        <name>Kein_Bestellbedarf</name>
+        <type>boolean</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue>false</initialValue>
+      </localVariable>
+      <localVariable>
+        <index>1</index>
+        <name>Bestellung</name>
+        <type>BestellungType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue />
+      </localVariable>
+      <localVariable>
+        <index>2</index>
+        <name>Bestellung_vollstaendig</name>
+        <type>boolean</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue>false</initialValue>
+      </localVariable>
+      <localVariable>
+        <index>3</index>
+        <name>Produkte_mangelhaft</name>
+        <type>boolean</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue>false</initialValue>
+      </localVariable>
+      <localVariable>
+        <index>4</index>
+        <name>Erhaltene_Produkte</name>
+        <type>ProduktlisteType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue />
+      </localVariable>
+      <localVariable>
+        <index>5</index>
+        <name>Reklamationen</name>
+        <type>ReklamationListeType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue />
+      </localVariable>
+      <localVariable>
+        <index>6</index>
+        <name>Reklamationsdatum</name>
+        <type>date</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue />
+      </localVariable>
+      <localVariable>
+        <index>7</index>
+        <name>Lieferdatum</name>
+        <type>date</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue />
+      </localVariable>
+      <localVariable>
+        <index>8</index>
+        <name>Bestelldatum</name>
+        <type>date</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <initialValue />
+      </localVariable>
+      <processControlElements>
+        <inputCondition id="InputCondition">
+          <flowsInto>
+            <nextElementRef id="Bedarf_prüfen" />
+          </flowsInto>
+        </inputCondition>
+        <task id="Bedarf_prüfen">
+          <name>Bedarf prüfen</name>
+          <flowsInto>
+            <nextElementRef id="T" />
+            <predicate ordering="0">/Net/Kein_Bestellbedarf/text() = 'true'</predicate>
+          </flowsInto>
+          <flowsInto>
+            <nextElementRef id="Bestellung_aufgeben" />
+            <isDefaultFlow />
+          </flowsInto>
+          <join code="xor" />
+          <split code="xor" />
+          <completedMappings>
+            <mapping>
+              <expression query="&lt;Kein_Bestellbedarf&gt;{/Bedarf_pruefen/Kein_Bestellbedarf/text()}&lt;/Kein_Bestellbedarf&gt;" />
+              <mapsTo>Kein_Bestellbedarf</mapsTo>
+            </mapping>
+          </completedMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-02d4bb74-63af-4517-b10b-3fbcd25ea1db</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Bedarf_pruefen" />
+        </task>
+        <task id="Bestellung_aufgeben">
+          <name>Bestellung aufgeben</name>
+          <flowsInto>
+            <nextElementRef id="Ware_annehmen" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <completedMappings>
+            <mapping>
+              <expression query="&lt;Bestelldatum&gt;{/Bestellung_aufgeben/Bestelldatum/text()}&lt;/Bestelldatum&gt;" />
+              <mapsTo>Bestelldatum</mapsTo>
+            </mapping>
+            <mapping>
+              <expression query="&lt;Bestellung&gt;{/Bestellung_aufgeben/Bestellung/*}&lt;/Bestellung&gt;" />
+              <mapsTo>Bestellung</mapsTo>
+            </mapping>
+          </completedMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-02d4bb74-63af-4517-b10b-3fbcd25ea1db</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Bestellung_aufgeben" />
+        </task>
+        <task id="T">
+          <flowsInto>
+            <nextElementRef id="OutputCondition" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <resourcing>
+            <offer initiator="user" />
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+        </task>
+        <task id="Ware_annehmen">
+          <name>Ware annehmen</name>
+          <flowsInto>
+            <nextElementRef id="Ware_überprüfen" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <completedMappings>
+            <mapping>
+              <expression query="&lt;Lieferdatum&gt;{/Ware_annehmen/Lieferdatum/text()}&lt;/Lieferdatum&gt;" />
+              <mapsTo>Lieferdatum</mapsTo>
+            </mapping>
+          </completedMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-c2486107-86fa-4bd8-82ac-b3e2e9b47831</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Ware_annehmen" />
+        </task>
+        <task id="Ware_überprüfen">
+          <name>Ware überprüfen</name>
+          <flowsInto>
+            <nextElementRef id="T_1" />
+            <isDefaultFlow />
+          </flowsInto>
+          <flowsInto>
+            <nextElementRef id="Ware_reklamieren" />
+            <predicate ordering="0">/Net/Produkte_mangelhaft/text() = 'true'</predicate>
+          </flowsInto>
+          <join code="xor" />
+          <split code="xor" />
+          <startingMappings>
+            <mapping>
+              <expression query="&lt;Bestellung&gt;{/Net/Bestellung/*}&lt;/Bestellung&gt;" />
+              <mapsTo>Bestellung</mapsTo>
+            </mapping>
+          </startingMappings>
+          <completedMappings>
+            <mapping>
+              <expression query="&lt;Produkte_mangelhaft&gt;{/Ware_ueberpruefen/Produkte_mangelhaft/text()}&lt;/Produkte_mangelhaft&gt;" />
+              <mapsTo>Produkte_mangelhaft</mapsTo>
+            </mapping>
+          </completedMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-02d4bb74-63af-4517-b10b-3fbcd25ea1db</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Ware_ueberpruefen" />
+        </task>
+        <task id="T_1">
+          <flowsInto>
+            <nextElementRef id="Ware_verräumen" />
+          </flowsInto>
+          <flowsInto>
+            <nextElementRef id="Rechnung_bezahlen" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <resourcing>
+            <offer initiator="user" />
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+        </task>
+        <task id="Ware_reklamieren">
+          <name>Ware reklamieren</name>
+          <flowsInto>
+            <nextElementRef id="Ware_zurückschicken" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <completedMappings>
+            <mapping>
+              <expression query="&lt;Reklamationen&gt;{/Ware_reklamieren/Reklamationen/*}&lt;/Reklamationen&gt;" />
+              <mapsTo>Reklamationen</mapsTo>
+            </mapping>
+          </completedMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-02d4bb74-63af-4517-b10b-3fbcd25ea1db</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Ware_reklamieren" />
+        </task>
+        <task id="Rechnung_bezahlen">
+          <name>Rechnung bezahlen</name>
+          <flowsInto>
+            <nextElementRef id="T_2" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <startingMappings>
+            <mapping>
+              <expression query="&lt;Bestellung&gt;{/Net/Bestellung/*}&lt;/Bestellung&gt;" />
+              <mapsTo>Bestellung</mapsTo>
+            </mapping>
+          </startingMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-02d4bb74-63af-4517-b10b-3fbcd25ea1db</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Rechnung_bezahlen" />
+        </task>
+        <task id="Ware_verräumen">
+          <name>Ware verräumen</name>
+          <flowsInto>
+            <nextElementRef id="T_2" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <startingMappings>
+            <mapping>
+              <expression query="&lt;Bestellung&gt;{/Net/Bestellung/*}&lt;/Bestellung&gt;" />
+              <mapsTo>Bestellung</mapsTo>
+            </mapping>
+          </startingMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-c2486107-86fa-4bd8-82ac-b3e2e9b47831</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Ware_verraeumen" />
+        </task>
+        <task id="Ware_zurückschicken">
+          <name>Ware zurückschicken</name>
+          <flowsInto>
+            <nextElementRef id="Ware_annehmen" />
+          </flowsInto>
+          <join code="xor" />
+          <split code="and" />
+          <startingMappings>
+            <mapping>
+              <expression query="&lt;Reklamationen&gt;{/Net/Reklamationen/*}&lt;/Reklamationen&gt;" />
+              <mapsTo>Reklamationen</mapsTo>
+            </mapping>
+          </startingMappings>
+          <completedMappings>
+            <mapping>
+              <expression query="&lt;Reklamationen&gt;{/Ware_zurueckschicken/Reklamationen/*}&lt;/Reklamationen&gt;" />
+              <mapsTo>Reklamationen</mapsTo>
+            </mapping>
+            <mapping>
+              <expression query="&lt;Reklamationsdatum&gt;{/Ware_zurueckschicken/Reklamationsdatum/text()}&lt;/Reklamationsdatum&gt;" />
+              <mapsTo>Reklamationsdatum</mapsTo>
+            </mapping>
+          </completedMappings>
+          <resourcing>
+            <offer initiator="system">
+              <distributionSet>
+                <initialSet>
+                  <role>RO-c2486107-86fa-4bd8-82ac-b3e2e9b47831</role>
+                </initialSet>
+              </distributionSet>
+            </offer>
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+          <decomposesTo id="Ware_zurueckschicken" />
+        </task>
+        <task id="T_2">
+          <flowsInto>
+            <nextElementRef id="T" />
+          </flowsInto>
+          <join code="and" />
+          <split code="and" />
+          <resourcing>
+            <offer initiator="user" />
+            <allocate initiator="user" />
+            <start initiator="user" />
+          </resourcing>
+        </task>
+        <outputCondition id="OutputCondition" />
+      </processControlElements>
+    </decomposition>
+    <decomposition id="Bedarf_pruefen" xsi:type="WebServiceGatewayFactsType">
+      <name>Bedarf pruefen</name>
+      <outputParam>
+        <index>0</index>
+        <name>Kein_Bestellbedarf</name>
+        <type>boolean</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </outputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Bestellung_aufgeben" xsi:type="WebServiceGatewayFactsType">
+      <name>Bestellung aufgeben</name>
+      <outputParam>
+        <index>0</index>
+        <name>Bestellung</name>
+        <type>BestellungType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </outputParam>
+      <outputParam>
+        <index>1</index>
+        <name>Bestelldatum</name>
+        <type>date</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <defaultValue />
+      </outputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Rechnung_bezahlen" xsi:type="WebServiceGatewayFactsType">
+      <name>Rechnung bezahlen</name>
+      <inputParam>
+        <index>0</index>
+        <name>Bestellung</name>
+        <type>BestellungType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </inputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Ware_annehmen" xsi:type="WebServiceGatewayFactsType">
+      <name>Ware annehmen</name>
+      <outputParam>
+        <index>0</index>
+        <name>Lieferdatum</name>
+        <type>date</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <defaultValue />
+      </outputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Ware_reklamieren" xsi:type="WebServiceGatewayFactsType">
+      <name>Ware reklamieren</name>
+      <outputParam>
+        <index>0</index>
+        <name>Reklamationen</name>
+        <type>ReklamationListeType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <defaultValue />
+      </outputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Ware_ueberpruefen" xsi:type="WebServiceGatewayFactsType">
+      <name>Ware ueberpruefen</name>
+      <inputParam>
+        <index>1</index>
+        <name>Bestellung</name>
+        <type>BestellungType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </inputParam>
+      <outputParam text-above="Sind in der Lieferung mangelhafte Produkte enthalten?" tooltip="Versehen Sie dieses Feld mit einem häkchen, wenn Sie einige der gelieferten Produkte reklamieren möchten.">
+        <index>0</index>
+        <name>Produkte_mangelhaft</name>
+        <type>boolean</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </outputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Ware_verraeumen" xsi:type="WebServiceGatewayFactsType">
+      <name>Ware verrauemen</name>
+      <inputParam>
+        <index>0</index>
+        <name>Bestellung</name>
+        <type>BestellungType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </inputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+    <decomposition id="Ware_zurueckschicken" xsi:type="WebServiceGatewayFactsType">
+      <name>Ware zurueckschicken</name>
+      <inputParam>
+        <index>0</index>
+        <name>Reklamationen</name>
+        <type>ReklamationListeType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </inputParam>
+      <outputParam>
+        <index>0</index>
+        <name>Reklamationen</name>
+        <type>ReklamationListeType</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+      </outputParam>
+      <outputParam>
+        <index>1</index>
+        <name>Reklamationsdatum</name>
+        <type>date</type>
+        <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+        <defaultValue />
+      </outputParam>
+      <externalInteraction>manual</externalInteraction>
+    </decomposition>
+  </specification>
+  <layout>
+    <locale language="de" country="DE"/>
+    <specification id="Beschaffung_PuH" defaultBgColor="-526351">
+      <size w="69" h="26"/>
+      <net id="Net" bgColor="-526351">
+        <bounds x="0" y="0" w="1276" h="514"/>
+        <frame x="0" y="0" w="1279" h="517"/>
+        <viewport x="0" y="0" w="1279" h="517"/>
+        <scale>1.3699999999999999</scale>
+        <vertex id="OutputCondition">
+          <attributes>
+            <bounds x="852" y="164" w="32" h="32"/>
+          </attributes>
+        </vertex>
+        <vertex id="InputCondition">
+          <attributes>
+            <bounds x="16" y="164" w="32" h="32"/>
+          </attributes>
+        </vertex>
+        <container id="Bedarf_prüfen">
+          <vertex>
+            <attributes>
+              <bounds x="96" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="66" y="194" w="96" h="18"/>
+            </attributes>
+          </label>
+          <decorator type="XOR_split">
+            <position>13</position>
+            <attributes>
+              <bounds x="127" y="164" w="11" h="32"/>
+            </attributes>
+          </decorator>
+        </container>
+        <container id="Rechnung_bezahlen">
+          <vertex>
+            <attributes>
+              <bounds x="575" y="164" w="33" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="543" y="192" w="100" h="39"/>
+            </attributes>
+          </label>
+        </container>
+        <container id="T">
+          <vertex>
+            <attributes>
+              <bounds x="764" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <decorator type="XOR_join">
+            <position>12</position>
+            <attributes>
+              <bounds x="754" y="164" w="11" h="32"/>
+            </attributes>
+          </decorator>
+        </container>
+        <container id="Ware_verräumen">
+          <vertex>
+            <attributes>
+              <bounds x="578" y="264" w="33" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="548" y="294" w="96" h="37"/>
+            </attributes>
+          </label>
+        </container>
+        <container id="Ware_annehmen">
+          <vertex>
+            <attributes>
+              <bounds x="304" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="270" y="194" w="96" h="36"/>
+            </attributes>
+          </label>
+          <decorator type="XOR_join">
+            <position>12</position>
+            <attributes>
+              <bounds x="294" y="164" w="11" h="32"/>
+            </attributes>
+          </decorator>
+        </container>
+        <container id="Ware_überprüfen">
+          <vertex>
+            <attributes>
+              <bounds x="388" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="367" y="192" w="100" h="39"/>
+            </attributes>
+          </label>
+          <decorator type="XOR_split">
+            <position>13</position>
+            <attributes>
+              <bounds x="419" y="164" w="11" h="32"/>
+            </attributes>
+          </decorator>
+        </container>
+        <container id="T_2">
+          <vertex>
+            <attributes>
+              <bounds x="666" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <decorator type="AND_join">
+            <position>12</position>
+            <attributes>
+              <bounds x="656" y="164" w="11" h="32"/>
+            </attributes>
+          </decorator>
+        </container>
+        <container id="T_1">
+          <vertex>
+            <attributes>
+              <bounds x="482" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <decorator type="AND_split">
+            <position>13</position>
+            <attributes>
+              <bounds x="513" y="164" w="11" h="32"/>
+            </attributes>
+          </decorator>
+        </container>
+        <container id="Ware_reklamieren">
+          <vertex>
+            <attributes>
+              <bounds x="392" y="264" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="360" y="294" w="96" h="36"/>
+            </attributes>
+          </label>
+        </container>
+        <container id="Bestellung_aufgeben">
+          <vertex>
+            <attributes>
+              <bounds x="200" y="164" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="168" y="194" w="96" h="36"/>
+            </attributes>
+          </label>
+        </container>
+        <container id="Ware_zurückschicken">
+          <vertex>
+            <attributes>
+              <bounds x="300" y="264" w="32" h="32"/>
+            </attributes>
+          </vertex>
+          <label>
+            <attributes>
+              <bounds x="270" y="294" w="98" h="36"/>
+            </attributes>
+          </label>
+        </container>
+        <flow source="Ware_verräumen" target="T_2">
+          <ports in="13" out="3"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+          </attributes>
+        </flow>
+        <flow source="Bedarf_prüfen" target="Bestellung_aufgeben">
+          <ports in="2" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="137" y="170,5"/>
+              <value x="200" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="T_2" target="T">
+          <ports in="13" out="2"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="697" y="170,5"/>
+              <value x="754" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Ware_reklamieren" target="Ware_zurückschicken">
+          <ports in="12" out="13"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="392" y="270,5"/>
+              <value x="331" y="270,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Bedarf_prüfen" target="T">
+          <ports in="1" out="1"/>
+          <attributes>
+            <lineStyle>12</lineStyle>
+            <points>
+              <value x="137" y="171,75"/>
+              <value x="448" y="92"/>
+              <value x="754" y="171,75"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Rechnung_bezahlen" target="T_2">
+          <ports in="13" out="2"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="611" y="170,5"/>
+              <value x="656" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="InputCondition" target="Bedarf_prüfen">
+          <ports in="13" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="47" y="170,5"/>
+              <value x="96" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Ware_zurückschicken" target="Ware_annehmen">
+          <ports in="12" out="3"/>
+          <attributes>
+            <lineStyle>12</lineStyle>
+            <points>
+              <value x="300" y="279,5"/>
+              <value x="265" y="243"/>
+              <value x="294" y="191,25"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Ware_überprüfen" target="T_1">
+          <ports in="2" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="429" y="170,5"/>
+              <value x="482" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Ware_annehmen" target="Ware_überprüfen">
+          <ports in="13" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="335" y="170,5"/>
+              <value x="388" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Bestellung_aufgeben" target="Ware_annehmen">
+          <ports in="13" out="2"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="231" y="170,5"/>
+              <value x="294" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="T_1" target="Rechnung_bezahlen">
+          <ports in="2" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="523" y="170,5"/>
+              <value x="580" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="Ware_überprüfen" target="Ware_reklamieren">
+          <ports in="3" out="13"/>
+          <attributes>
+            <lineStyle>12</lineStyle>
+            <points>
+              <value x="429" y="191,25"/>
+              <value x="456" y="236"/>
+              <value x="423" y="279,5"/>
+            </points>
+          </attributes>
+        </flow>
+        <flow source="T_1" target="Ware_verräumen">
+          <ports in="3" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+          </attributes>
+        </flow>
+        <flow source="T" target="OutputCondition">
+          <ports in="13" out="12"/>
+          <attributes>
+            <lineStyle>11</lineStyle>
+            <points>
+              <value x="795" y="170,5"/>
+              <value x="852" y="170,5"/>
+            </points>
+          </attributes>
+        </flow>
+      </net>
+    </specification>
+  </layout>
+</specificationSet>
