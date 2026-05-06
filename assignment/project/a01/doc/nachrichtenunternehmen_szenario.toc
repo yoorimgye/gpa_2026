@@ -1,0 +1,9 @@
+\babel@toc {ngerman}{}\relax 
+\contentsline {section}{\numberline {1}Unternehmensbeschreibung}{2}{section.1}%
+\contentsline {section}{\numberline {2}Organigramm}{2}{section.2}%
+\contentsline {section}{\numberline {3}Prozesslandkarte}{4}{section.3}%
+\contentsline {section}{\numberline {4}Wertsch\"opfungskettendiagramme}{5}{section.4}%
+\contentsline {section}{\numberline {5}BPMN-Diagramm des ausgewählten Kernprozesses}{6}{section.5}%
+\contentsline {section}{\numberline {6}ER-Diagramm für die Entitäten des Unterstützungsprozesses}{7}{section.6}%
+\contentsline {section}{\numberline {7}Konkrete Beschreibung verschiedener Prozessdurchläufe}{7}{section.7}%
+\contentsline {section}{\numberline {8}Funktionale Anforderungen}{9}{section.8}%
